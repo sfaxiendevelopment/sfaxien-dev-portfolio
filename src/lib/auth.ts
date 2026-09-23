@@ -1,4 +1,5 @@
 import { uid } from '@/lib/local-store'
+import { cloudLogin, setCloudToken } from '@/lib/cloud'
 import type { AdminSession } from '@/types'
 
 export interface AuthError {
@@ -15,9 +16,8 @@ interface PersistedSession extends AdminSession {
 }
 
 const adminConfig = {
-  email: (import.meta.env.VITE_ADMIN_EMAIL as string | undefined) || 'sfaxiendevlopment@gmail.com',
   username: (import.meta.env.VITE_ADMIN_USERNAME as string | undefined) || 'SFAXIENYESSINEDEV@2005',
-  password: (import.meta.env.VITE_ADMIN_PASSWORD as string | undefined) || 'SFAXIENDEVYESSINE@2005@DEV',
+  email: (import.meta.env.VITE_ADMIN_EMAIL as string | undefined) || 'sfaxiendevlopment@gmail.com',
   displayName: (import.meta.env.VITE_ADMIN_DISPLAY_NAME as string | undefined) || 'Sfaxien Dev',
 }
 
@@ -67,13 +67,17 @@ export async function signInWithUsernameOrEmail(
     return { session: null, error: { message: 'Username and password are required.' } }
   }
 
-  const identifierMatches =
-    trimmed.toLowerCase() === adminConfig.username.toLowerCase() ||
-    trimmed.toLowerCase() === adminConfig.email.toLowerCase()
-  const passwordMatches = password === adminConfig.password
+  const result = await cloudLogin(trimmed, password)
 
-  if (!identifierMatches || !passwordMatches) {
+  if (result.status === 'invalid') {
     return { session: null, error: { message: 'Invalid credentials.' } }
+  }
+
+  if (result.status === 'unavailable' && !import.meta.env.DEV) {
+    return {
+      session: null,
+      error: { message: 'Could not reach the content service. Check your connection and try again.' },
+    }
   }
 
   const session: PersistedSession = {
@@ -107,6 +111,7 @@ export async function getCurrentSession(): Promise<AdminSession | null> {
 export async function signOut(): Promise<void> {
   if (typeof window === 'undefined') return
   window.localStorage.removeItem(SESSION_KEY)
+  setCloudToken(null)
   notify(null)
 }
 

@@ -1,4 +1,5 @@
 import { tableRead, tableWrite, tableUpsert, uid, nowIso } from '@/lib/local-store'
+import { cloudPostContact } from '@/lib/cloud'
 import type { ContactFormPayload, ContactFormResult, ContactMessageRow } from '@/types'
 
 const KEY = 'sfaxien.messages'
@@ -58,6 +59,15 @@ export async function submitContact(
   } else {
     tableUpsert(KEY, row)
   }
+
+  await cloudPostContact({
+    name,
+    email,
+    projectType: payload.projectType || 'Other',
+    budget: payload.budget || '',
+    message,
+    website: options.website ?? '',
+  })
 
   return { ok: true }
 }

@@ -1,4 +1,5 @@
 import type { CategoryRow, TechnologyRow, ContactMessageRow } from '@/types'
+import { cloudFetchContent, cloudPutTable, getCloudToken } from '@/lib/cloud'
 
 /**
  * Local web-storage data layer.
@@ -35,9 +36,20 @@ export function tableRead<T>(key: string): T[] {
   }
 }
 
+const CLOUD_TABLES: Record<string, string> = {
+  [TABLES.projects]: 'projects',
+  [TABLES.categories]: 'categories',
+  [TABLES.technologies]: 'technologies',
+}
+
+let hydratingFromCloud = false
+
 export function tableWrite<T>(key: string, rows: T[]): void {
   if (typeof window === 'undefined') return
   window.localStorage.setItem(key, JSON.stringify(rows))
+  const table = CLOUD_TABLES[key]
+  if (!table || hydratingFromCloud || !getCloudToken()) return
+  void cloudPutTable(table, rows)
 }
 
 /** Insert or update a row in a table (matched by `id`). */
@@ -252,6 +264,74 @@ function seedIfNeeded(): void {
 export function initLocalApi(): void {
   seedIfNeeded()
   void hydrateMediaCache()
+}
+
+/** Pull shared content from the Cloudflare Worker into the local cache. */
+export async function hydrateFromCloud(): Promise<boolean> {
+  const content = await cloudFetchContent()
+  if (!content) return false
+  hydratingFromCloud = true
+  try {
+    if (content.categories.length) tableWrite(TABLES.categories, content.categories)
+    if (content.technologies.length) tableWrite(TABLES.technologies, content.technologies)
+    if (content.projects.length || !tableRead(TABLES.projects).length) {
+      tableWrite(TABLES.projects, content.projects)
+    }
+  } finally {
+    hydratingFromCloud = false
+  }
+  return true
+}
+
+export interface PublishResult {
+  ok: boolean
+  counts: { projects: number; categories: number; technologies: number }
+}
+
+export interface ContentBundle {
+  exported_at: string
+  projects: unknown[]
+  categories: unknown[]
+  technologies: unknown[]
+}
+
+export function exportContent(): ContentBundle {
+  return {
+    exported_at: nowIso(),
+    projects: tableRead(TABLES.projects),
+    categories: tableRead(TABLES.categories),
+    technologies: tableRead(TABLES.technologies),
+  }
+}
+
+export function importContent(bundle: Partial<ContentBundle>): { projects: number } {
+  const counts = { projects: 0 }
+  if (Array.isArray(bundle.projects)) {
+    tableWrite(TABLES.projects, bundle.projects)
+    counts.projects = bundle.projects.length
+  }
+  if (Array.isArray(bundle.categories) && bundle.categories.length) {
+    tableWrite(TABLES.categories, bundle.categories)
+  }
+  if (Array.isArray(bundle.technologies) && bundle.technologies.length) {
+    tableWrite(TABLES.technologies, bundle.technologies)
+  }
+  return counts
+}
+
+/** Push the local content tables to the Cloudflare Worker (admin only). */
+export async function publishContentToCloud(): Promise<PublishResult> {
+  const projects = tableRead<unknown>(TABLES.projects)
+  const categories = tableRead<unknown>(TABLES.categories)
+  const technologies = tableRead<unknown>(TABLES.technologies)
+  const counts = { projects: projects.length, categories: categories.length, technologies: technologies.length }
+  if (!getCloudToken()) return { ok: false, counts }
+  const results = await Promise.all([
+    cloudPutTable('projects', projects),
+    cloudPutTable('categories', categories),
+    cloudPutTable('technologies', technologies),
+  ])
+  return { ok: results.every(Boolean), counts }
 }
 
 // Constants re-exported for convenience/parity with the old storage module.
