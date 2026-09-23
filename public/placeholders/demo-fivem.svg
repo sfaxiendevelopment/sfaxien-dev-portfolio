@@ -1,0 +1,28 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1600" height="900" viewBox="0 0 1600 900">
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#0a0718" />
+      <stop offset="1" stop-color="#181233" />
+    </linearGradient>
+    <radialGradient id="glow" cx="0.25" cy="0.3" r="0.7">
+      <stop offset="0" stop-color="#8b5cf6" stop-opacity="0.35" />
+      <stop offset="1" stop-color="#8b5cf6" stop-opacity="0" />
+    </radialGradient>
+    <filter id="n">
+      <feTurbulence type="fractalNoise" baseFrequency="0.85" numOctaves="2" stitchTiles="stitch" />
+    </filter>
+  </defs>
+  <rect width="1600" height="900" fill="url(#bg)" />
+  <rect width="1600" height="900" fill="url(#glow)" />
+  <path d="M0 560 L260 400 L540 620 L820 360 L1100 600 L1400 380 L1600 520 V900 H0 Z" fill="#3b82f6" opacity="0.06"/>
+  <g opacity="0.09" filter="url(#n)"><rect width="1600" height="900" fill="#ffffff"/></g>
+  <g stroke="#a78bfa" stroke-opacity="0.2" stroke-width="1">
+    <path d="M0 640 L300 500 L600 680 L900 420 L1200 620 L1600 460 V900 H0 Z" fill="none"/>
+  </g>
+  <g transform="translate(72, 400)">
+    <rect x="0" y="0" width="64" height="8" rx="4" fill="#8b5cf6" opacity="0.9"/>
+    <text y="88" font-family="Arial, sans-serif" font-size="72" font-weight="700" fill="#f8fafc" letter-spacing="-1">DEMO PROJECT</text>
+    <text y="128" font-family="Arial, sans-serif" font-size="30" fill="#c4b5fd" letter-spacing="4">FIVEM DEVELOPMENT</text>
+  </g>
+  <text x="72" y="850" font-family="Arial, sans-serif" font-size="22" fill="#475569" letter-spacing="4">PLACEHOLDER · REPLACE VIA ADMIN CMS</text>
+</svg>

@@ -1,0 +1,33 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="630" viewBox="0 0 1200 630">
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#05050a" />
+      <stop offset="0.6" stop-color="#070a14" />
+      <stop offset="1" stop-color="#0a1022" />
+    </linearGradient>
+    <radialGradient id="glow" cx="0.7" cy="0.2" r="0.8">
+      <stop offset="0" stop-color="#38bdf8" stop-opacity="0.35" />
+      <stop offset="1" stop-color="#38bdf8" stop-opacity="0" />
+    </radialGradient>
+    <linearGradient id="txt" x1="0" y1="0" x2="1" y2="0">
+      <stop offset="0" stop-color="#ffffff" />
+      <stop offset="1" stop-color="#bae6fd" />
+    </linearGradient>
+    <filter id="n">
+      <feTurbulence type="fractalNoise" baseFrequency="0.9" numOctaves="2" stitchTiles="stitch" />
+    </filter>
+  </defs>
+  <rect width="1200" height="630" fill="url(#bg)" />
+  <rect width="1200" height="630" fill="url(#glow)" />
+  <g opacity="0.5">
+    <path d="M0 520 L300 300 L600 470 L900 220 L1200 430 V630 H0 Z" fill="none" stroke="#38bdf8" stroke-opacity="0.12" stroke-width="2" />
+  </g>
+  <g opacity="0.1" filter="url(#n)">
+    <rect width="1200" height="630" fill="#38bdf8" />
+  </g>
+  <g transform="translate(66, 252)">
+    <text font-family="Arial, sans-serif" font-size="96" font-weight="700" fill="url(#txt)" letter-spacing="2">SFAXIEN DEV</text>
+    <text y="46" font-family="Arial, sans-serif" font-size="26" fill="#94a3b8" letter-spacing="6">FULL-STACK · FIVEM · GAME · UI/UX</text>
+  </g>
+  <text x="66" y="588" font-family="Arial, sans-serif" font-size="18" fill="#475569" letter-spacing="3">SFAXIEN.DEV</text>
+</svg>
